@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+    <form class="mt-5" action="/blogs/add" method="POST" onsubmit="process_markdown()">
+        <div class="form-group">
+            <input type="text" class="form-control" id="blog-title" name="title" placeholder="Title (24)" maxlength="24" required>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="blog-body">
+                        <span>Body&nbsp;<small class="text-muted">Markdown support</small></span>
+                    </label>
+                    <textarea class="form-control col-md-12" id="blog-body" style="resize: none; height: 300px;" required></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="blog-body">Preview</label>
+                    <div id="markdown-preview" style="border: 1px solid #eee; overflow-y: scroll; height: 300px;" class="form-control col-md-12" required></div>
+                </div>
+            </div>
+        </div>
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="private-checkbox" name="private">
+            <label class="form-check-label" for="private-checkbox">Private 🔒</label>
+            <small class="text-muted">No one else will be able to see this blog post.</small>
+        </div>
+        <input type="hidden" id="blog-body-html" name="html" value="">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <script src="/static/js/showdown.min.js"></script>
+    <script src="/static/js/purify.min.js"></script>
+    <script>
+        function sanitize(html) {
+            return DOMPurify.sanitize(html, {FORBID_ATTR: ['form']});
+        }
+
+        function refreshMarkdown(converter) {
+            text = document.getElementById('blog-body').value;
+            document.getElementById('markdown-preview').innerHTML = sanitize(converter.makeHtml(text));
+        }
+
+        function process_markdown() {
+            let converter = new showdown.Converter();
+            text = document.getElementById('blog-body').value;
+            document.getElementById('blog-body-html').value = sanitize(converter.makeHtml(text));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() { 
+            let body = document.getElementById('blog-body')
+            var converter = new showdown.Converter();
+            body.addEventListener('input', function() {
+                refreshMarkdown(converter);
+            })
+
+            body.value = `# Hi!
+
+This blogging platform is awesome because you can use Markdown. It also uses [DOMPurify](https://github.com/cure53/DOMPurify) to prevent XSS attacks!
+
+You can use:
+
+<ul>
+<li>Lists!</li>
+<li><b>Text</b> <i>formatting</i><u>!</u></li>
+<li>and many more...</li>
+</ul>
+
+\`\`\`javascript
+let x = "Code blocks";
+let y = "are supported too!"
+let x = "(the preview is scrollable :))"
+\`\`\`
+`;
+        refreshMarkdown(converter);
+        }, false);
+    </script>
+</div>
+{% endblock %}

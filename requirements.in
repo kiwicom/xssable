@@ -1,0 +1,4 @@
+bcrypt
+flask
+Flask-SeaSurf
+Flask-Session

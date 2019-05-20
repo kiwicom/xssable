@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for username in users %}
+                    <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td><a href="/blogs?u={{ username }}">{{ username }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
