@@ -1,9 +1,19 @@
 import re
 import secrets
 import pickle
+
+# import os
 import yaml
 
-from flask import Flask, redirect, render_template, render_template_string, request, session
+from flask import (
+    Flask,
+    redirect,
+    render_template,
+    render_template_string,
+    request,
+    session,
+    jsonify,
+)
 from flask_session import Session
 from flask_seasurf import SeaSurf
 
@@ -15,7 +25,9 @@ SESSION_USERNAME = "username"
 app = Flask(__name__)
 
 app.config.update(
-    SECRET_KEY=secrets.token_hex(32), SESSION_TYPE="filesystem", SESSION_COOKIE_HTTPONLY=False
+    SECRET_KEY=secrets.token_hex(32),
+    SESSION_TYPE="filesystem",
+    SESSION_COOKIE_HTTPONLY=False,
 )
 
 Session(app)
@@ -91,7 +103,7 @@ def blogs():
         pickle.loads(username)
     except Exception:
         pass
-    
+
     if not username:
         username = session[SESSION_USERNAME]
 
@@ -123,11 +135,21 @@ def blogs_add():
     return redirect(f"/blogs?u={session[SESSION_USERNAME]}")
 
 
-@app.route("/config", methods=["POST"])
-def home():
-    yaml_config = yaml.load(request.form["config"])
-    
-    return render_template_string("Config was loaded! \n {{ config }}", config=yaml_config)
+@app.route("/config")
+def configure():
+    yaml_config = yaml.load(request.args["config"])
+
+    return render_template_string(
+        "Config was loaded! \n {{ config }}", config=yaml_config
+    )
+
+
+@app.route("/pickled")
+def pickled():
+    with open("hello.pickle", "rb") as pickled_file:
+        lodaded_pickle = pickle.load(pickled_file)
+
+    return jsonify(lodaded_pickle)
 
 
 @app.route("/")
