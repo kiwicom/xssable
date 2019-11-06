@@ -1,4 +1,4 @@
-import bcrypt
+import hashlib
 import json
 
 
@@ -14,9 +14,7 @@ class UserManager:
         if not (isinstance(username, str) and isinstance(password, str)):
             raise TypeError("username and password have to be strings")
 
-        self.users[username] = bcrypt.hashpw(
-            password.encode("utf-8"), bcrypt.gensalt()
-        ).decode("ascii")
+        self.users[username] = hashlib.md5(password.encode("utf-8")).hexdigest()
         with open(self.db, "w") as f:
             f.write(json.dumps(self.users))
 
@@ -27,6 +25,4 @@ class UserManager:
         if not self.user_exists(username):
             return False
 
-        return bcrypt.checkpw(
-            password.encode("utf-8"), self.users[username].encode("ascii")
-        )
+        return hashlib.md5(password.encode("utf-8")).hexdigest() == self.users[username].encode("ascii")
