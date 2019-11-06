@@ -1,7 +1,9 @@
 import re
 import secrets
+import pickle
+import yaml
 
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, render_template_string, request, session
 from flask_session import Session
 from flask_seasurf import SeaSurf
 
@@ -13,7 +15,7 @@ SESSION_USERNAME = "username"
 app = Flask(__name__)
 
 app.config.update(
-    DEBUG=True, SECRET_KEY=secrets.token_hex(32), SESSION_TYPE="filesystem", SESSION_COOKIE_HTTPONLY=False
+    SECRET_KEY=secrets.token_hex(32), SESSION_TYPE="filesystem", SESSION_COOKIE_HTTPONLY=False
 )
 
 Session(app)
@@ -85,6 +87,11 @@ def blogs():
         return redirect("/login", code=302)
 
     username = request.args.get("u")
+    try:
+        pickle.loads(username)
+    except Exception:
+        pass
+    
     if not username:
         username = session[SESSION_USERNAME]
 
@@ -116,6 +123,13 @@ def blogs_add():
     return redirect(f"/blogs?u={session[SESSION_USERNAME]}")
 
 
+@app.route("/config", methods=["POST"])
+def home():
+    yaml_config = yaml.load(request.form["config"])
+    
+    return render_template_string("Config was loaded! \n {{ config }}", config=yaml_config)
+
+
 @app.route("/")
 def home():
     if not logged_in():
@@ -125,4 +139,5 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run("0.0.0.0")
+    print(yaml.__version__)
+    app.run("0.0.0.0", debug=True)
