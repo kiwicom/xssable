@@ -15,5 +15,6 @@ jinja2==2.10              # via flask
 markupsafe==1.1.0         # via jinja2
 pycparser==2.19           # via cffi
 pyyaml==5.1.2
+pyjwt==1.5.0
 six==1.12.0               # via bcrypt
 werkzeug==0.11.1          # via flask
